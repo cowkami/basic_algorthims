@@ -27,7 +27,7 @@ impl<T: cmp::PartialOrd> Heap<T> {
 
 
 #[cfg(test)]
-mod tests {
+mod test_priority_queue {
     use super::*;
 
     #[test]
