@@ -15,7 +15,6 @@ impl<T: cmp::PartialOrd> Heap<T> {
 
         let mut i = self.len - 1;
         while i > 0 {
-            println!("{}", i);
             let j = (i - 1) / 2;
             if self.data[i] < self.data[j] {
                 self.data.swap(i, j);
