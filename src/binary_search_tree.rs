@@ -1,3 +1,4 @@
+#[derive(Debug)]
 struct BinaryTree<T> {
     value: T,
     left: Option<Box<BinaryTree<T>>>,
@@ -34,29 +35,50 @@ impl<T: PartialOrd> BinaryTree<T> {
 mod test_binary_search_tree {
     use super::*;
 
+    fn _eq_node_value<T: PartialEq>(node: &Option<Box<BinaryTree<T>>>, value: T) -> bool {
+        match node {
+            Some(ref n) => n.value == value,
+            None => false,
+        }
+    }
+
     #[test]
     fn push() {
         let mut tree = BinaryTree::<i8>::new(5);
 
         // check initialization
         assert_eq!(tree.value, 5);
-        // assert!(let None = tree.left);
-        // assert!(let None = tree.right);
+        assert!(tree.left.is_none());
+        assert!(tree.right.is_none());
 
         // check if 2 is to the left of 5
-        // tree.push(2);
-        // assert_eq!(tree.value, Some(5));
-        // assert_eq!(tree.left.value, Some(2));
-        // assert_eq!(tree.right, None);
+        tree.push(2);
+        assert_eq!(tree.value, 5);
+        assert!(_eq_node_value(&tree.left, 2));
+        assert!(tree.right.is_none());
 
         // check if 9 is to the right of 5
-        // tree.push(9);
-        // aassert_eq!(tree.value, Some(5));
-        // assert_eq!(tree.left.value, Some(2));
-        // assert_eq!(tree.right.value, Some(9));
+        tree.push(9);
+        assert_eq!(tree.value, 5);
+        assert!(_eq_node_value(&tree.left, 2));
+        assert!(_eq_node_value(&tree.right, 9));
+
+        fn type_of<T>(_: T) -> String{
+            let a = std::any::type_name::<T>();
+            return a.to_string();
+        }
 
         // check if 8 is to the left of 9
-        // assert_eq!(tree.left.left, 8);
+        tree.push(8);
+        assert_eq!(tree.value, 5);
+        assert!(_eq_node_value(&tree.left, 2));
+        assert!(_eq_node_value(&tree.right, 9));
+        assert!(
+            match tree.right {
+                Some(right) => _eq_node_value(&right.left, 8),
+                None => false,
+            }
+        );
     } 
 
     #[test]
