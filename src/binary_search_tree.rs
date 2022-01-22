@@ -63,11 +63,6 @@ mod test_binary_search_tree {
         assert!(_eq_node_value(&tree.left, 2));
         assert!(_eq_node_value(&tree.right, 9));
 
-        fn type_of<T>(_: T) -> String{
-            let a = std::any::type_name::<T>();
-            return a.to_string();
-        }
-
         // check if 8 is to the left of 9
         tree.push(8);
         assert_eq!(tree.value, 5);
