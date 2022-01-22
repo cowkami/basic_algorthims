@@ -1,33 +1,31 @@
-// use std::cmp;
-
 struct BinaryTree<T> {
-    value: Option<T>,
-    left: Option<BinaryTree<T>>,
-    right: Option<BinaryTree<T>>,
+    value: T,
+    left: Option<Box<BinaryTree<T>>>,
+    right: Option<Box<BinaryTree<T>>>,
 }
 
 impl<T: PartialOrd> BinaryTree<T> {
-    fn new() -> Self {
-        Self { value: None, left: None, right: None }
-    }
-    fn push(&mut self, new_value: T) {
-        if let Some(v) = self.value {
-            if v < new_value {
-                if let None = self.left {
-                    self.left = Some(BinaryTree::<T>::new());
-                }
-                self.left.push(new_value);
-            } else {
-                if let None = self.right {
-                    self.right = Some(BinaryTree::<T>::new());
-                }
-                self.right.push(new_value);
-            }
-        } else {
-            self.value = Some(new_value);
+    fn new(new_value: T) -> Self {
+        Self {
+            value: new_value,
+            left: None,
+            right: None,
         }
     }
-    fn pop(&mut self) -> Option<T> { return self.value }
+    fn push(&mut self, new_value: T) {
+        if self.value > new_value {
+            match self.left {
+                Some(ref mut left) => left.push(new_value),
+                None => self.left = Some(Box::new(BinaryTree::<T>::new(new_value))),
+            }
+        } else {
+            match self.right {
+                Some(ref mut right) => right.push(new_value),
+                None => self.right = Some(Box::new(BinaryTree::<T>::new(new_value))),
+            }
+        } 
+    }
+    fn pop(&mut self) {}
     fn delete(&mut self, value: T) {}
 }
  
@@ -38,11 +36,10 @@ mod test_binary_search_tree {
 
     #[test]
     fn push() {
-        let mut tree = BinaryTree::<i8>::new();
+        let mut tree = BinaryTree::<i8>::new(5);
 
-        // check just push
-        tree.push(5);
-        assert_eq!(tree.value, Some(5));
+        // check initialization
+        assert_eq!(tree.value, 5);
         // assert!(let None = tree.left);
         // assert!(let None = tree.right);
 
