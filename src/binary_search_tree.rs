@@ -1,84 +1,138 @@
-#[derive(Debug)]
-struct BinaryTree<T> {
-    value: T,
-    left: Option<Box<BinaryTree<T>>>,
-    right: Option<Box<BinaryTree<T>>>,
+#[derive(Debug, PartialEq)]
+enum BST<T> {
+    Leaf {
+        value: T,
+        left: Box<BST<T>>,
+        right: Box<BST<T>>,
+    },
+    Nil,
 }
 
-impl<T: PartialOrd> BinaryTree<T> {
-    fn new(new_value: T) -> Self {
-        Self {
-            value: new_value,
-            left: None,
-            right: None,
+impl<T: Ord> BST<T> {
+    fn new() -> Self {
+        Self::Nil
+    }
+
+    fn push(&mut self, new_value: T) {
+        match self {
+            Self::Leaf {
+                ref value,
+                ref mut left,
+                ref mut right,
+            } => match *value > new_value {
+                true => left.push(new_value),
+                false => right.push(new_value),
+            },
+            Self::Nil => {
+                *self = Self::Leaf {
+                    value: new_value,
+                    left: Box::new(Self::Nil),
+                    right: Box::new(Self::Nil),
+                }
+            }
         }
     }
-    fn push(&mut self, new_value: T) {
-        if self.value > new_value {
-            match self.left {
-                Some(ref mut left) => left.push(new_value),
-                None => self.left = Some(Box::new(BinaryTree::<T>::new(new_value))),
-            }
-        } else {
-            match self.right {
-                Some(ref mut right) => right.push(new_value),
-                None => self.right = Some(Box::new(BinaryTree::<T>::new(new_value))),
-            }
-        } 
-    }
-    fn pop(&mut self) {}
-    fn delete(&mut self, value: T) {}
+
+    // fn pop(&mut self) -> T {
+    //     match self.left {
+    //         Some(ref mut left) => left.pop(),
+    //         None => {
+    //             let ret = self.value;
+    //             self = None;
+    //             ret
+    //         },
+    //     }
+    // }
+
+    // fn delete(&mut self, value: T) -> bool { true }
 }
- 
 
 #[cfg(test)]
 mod test_binary_search_tree {
     use super::*;
 
-    fn _eq_node_value<T: PartialEq>(node: &Option<Box<BinaryTree<T>>>, value: T) -> bool {
+    fn _eq_node_value<T: PartialEq>(node: &Box<BST<T>>, expected_value: T) -> bool {
         match node {
-            Some(ref n) => n.value == value,
-            None => false,
+            BST::Leaf {
+                ref value,
+                left,
+                right,
+            } => value == expected_value,
+            BST::Nil => false,
         }
+    }
+
+    fn _new_tree() -> BST<i8> {
+        let mut tree = BST::<i8>::new();
+        tree.push(5);
+        tree.push(2);
+        tree.push(9);
+        tree.push(8);
+        tree
     }
 
     #[test]
     fn push() {
-        let mut tree = BinaryTree::<i8>::new(5);
+        let mut tree = BST::<i8>::new();
 
         // check initialization
-        assert_eq!(tree.value, 5);
-        assert!(tree.left.is_none());
-        assert!(tree.right.is_none());
+        assert_eq!(tree, BST::Nil);
 
-        // check if 2 is to the left of 5
-        tree.push(2);
-        assert_eq!(tree.value, 5);
-        assert!(_eq_node_value(&tree.left, 2));
-        assert!(tree.right.is_none());
+        // check if 5 is pushed
+        tree.push(5);
+        assert!(_eq_node_value(&tree, 5));
 
-        // check if 9 is to the right of 5
-        tree.push(9);
-        assert_eq!(tree.value, 5);
-        assert!(_eq_node_value(&tree.left, 2));
-        assert!(_eq_node_value(&tree.right, 9));
+        //     // check if 2 is to the left of 5
+        //     tree.push(2);
+        //     assert_eq!(tree.value, 5);
+        //     assert!(_eq_node_value(&tree.left, 2));
+        //     assert!(tree.right.is_none());
 
-        // check if 8 is to the left of 9
-        tree.push(8);
-        assert_eq!(tree.value, 5);
-        assert!(_eq_node_value(&tree.left, 2));
-        assert!(_eq_node_value(&tree.right, 9));
-        assert!(
-            match tree.right {
-                Some(right) => _eq_node_value(&right.left, 8),
-                None => false,
-            }
-        );
-    } 
+        //     // check if 9 is to the right of 5
+        //     tree.push(9);
+        //     assert_eq!(tree.value, 5);
+        //     assert!(_eq_node_value(&tree.left, 2));
+        //     assert!(_eq_node_value(&tree.right, 9));
 
-    #[test]
-    fn pop() {} 
+        //     // check if 8 is to the left of 9
+        //     tree.push(8);
+        //     assert_eq!(tree.value, 5);
+        //     assert!(_eq_node_value(&tree.left, 2));
+        //     assert!(_eq_node_value(&tree.right, 9));
+        //     assert!(
+        //         match tree.right {
+        //             Some(right) => _eq_node_value(&right.left, 8),
+        //             None => false,
+        //         }
+        //     );
+    }
 
-    #[test]
-    fn delete() {}
+    // #[test]
+    // fn pop() {
+    //     let mut tree = _new_tree();
+
+    //     assert_eq!(tree.pop(), 2);
+    //     assert_eq!(tree.value, 5);
+    //     assert!(tree.left.is_none());
+    //     assert!(_eq_node_value(&tree.right, 9));
+    //     assert!(
+    //         match tree.right {
+    //             Some(right) => _eq_node_value(&right.left, 8),
+    //             None => false,
+    //         }
+    //     );
+    // }
+
+    // #[test]
+    // fn delete() {
+    // let mut tree1 = new_data();
+
+    // // check if returns false when no 6 value on any node
+    // assert!(!tree1.delete(6));
+
+    // // check if replaces nodes keeping smaller left
+    // assert!(tree1.delete(5));
+    // assert!(_eq_node_value(&tree.left, 2));
+    // assert!(tree.right.is_none());
+    // }
 }
