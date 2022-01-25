@@ -8,7 +8,7 @@ enum BST<T> {
     Nil,
 }
 
-impl<T: Ord> BST<T> {
+impl<T: Ord + PartialEq> BST<T> {
     fn new() -> Self {
         Self::Nil
     }
@@ -51,13 +51,9 @@ impl<T: Ord> BST<T> {
 mod test_binary_search_tree {
     use super::*;
 
-    fn _eq_node_value<T: PartialEq>(node: &Box<BST<T>>, expected_value: T) -> bool {
+    fn _eq_node_value<T: PartialEq>(node: &BST<T>, expected_value: T) -> bool {
         match node {
-            BST::Leaf {
-                ref value,
-                left,
-                right,
-            } => value == expected_value,
+            BST::Leaf { value, .. } => *value == expected_value,
             BST::Nil => false,
         }
     }
@@ -82,11 +78,18 @@ mod test_binary_search_tree {
         tree.push(5);
         assert!(_eq_node_value(&tree, 5));
 
-        //     // check if 2 is to the left of 5
-        //     tree.push(2);
-        //     assert_eq!(tree.value, 5);
-        //     assert!(_eq_node_value(&tree.left, 2));
-        //     assert!(tree.right.is_none());
+        // check if 2 is to the left of 5
+        tree.push(2);
+        });
+        assert!(_eq_node_value(&tree, 5));
+        assert!(match tree {
+            BST::Leaf {
+                value,
+                ref mut left,
+                right,
+            } => _eq_node_value(left, 2) && _eq_node_value(node, expected_value),
+            BST::Nil => false,
+        });
 
         //     // check if 9 is to the right of 5
         //     tree.push(9);
