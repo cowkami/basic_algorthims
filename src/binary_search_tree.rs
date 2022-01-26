@@ -90,30 +90,51 @@ mod test_binary_search_tree {
         assert!(_eq_node_value(&tree, 5));
         assert!(match tree {
             BST::Leaf {
-                value,
-                left,
-                right,
-            } => _eq_node_value(&left, 2) && right.is_nil(),
-            BST::Nil => false,
+                value: _,
+                ref left,
+                ref right,
+            } => _eq_node_value(left, 2) && right.is_nil(),
+            _ => false,
         });
 
-        //     // check if 9 is to the right of 5
-        //     tree.push(9);
-        //     assert_eq!(tree.value, 5);
-        //     assert!(_eq_node_value(&tree.left, 2));
-        //     assert!(_eq_node_value(&tree.right, 9));
+        // check if 9 is to the right of 5
+        tree.push(9);
+        assert!(_eq_node_value(&tree, 5));
+        assert!(match tree {
+            BST::Leaf {
+                value: _,
+                ref left,
+                ref right,
+            } => _eq_node_value(left, 2) && _eq_node_value(right, 9),
+            _ => false,
+        });
 
-        //     // check if 8 is to the left of 9
-        //     tree.push(8);
-        //     assert_eq!(tree.value, 5);
-        //     assert!(_eq_node_value(&tree.left, 2));
-        //     assert!(_eq_node_value(&tree.right, 9));
-        //     assert!(
-        //         match tree.right {
-        //             Some(right) => _eq_node_value(&right.left, 8),
-        //             None => false,
-        //         }
-        //     );
+        // check if 8 is to the left of 9
+        tree.push(8);
+        assert!(_eq_node_value(&tree, 5));
+        assert!(match tree {
+            BST::Leaf {
+                value: _,
+                ref left,
+                ref right,
+            } => _eq_node_value(left, 2) && _eq_node_value(right, 9),
+            _ => false,
+        });
+        assert!(match tree {
+            BST::Leaf {
+                value: _,
+                left: _,
+                right: right1,
+            } => match *right1 {
+                BST::Leaf {
+                    value: _,
+                    left: ref left2,
+                    right: _,
+                } => _eq_node_value(left2, 8),
+                _ => false,
+            },
+            _ => false,
+        });
     }
 
     // #[test]
