@@ -13,6 +13,13 @@ impl<T: Ord + PartialEq> BST<T> {
         Self::Nil
     }
 
+    fn is_nil(&self) -> bool {
+        match self {
+            Self::Nil => true,
+            _ => false,
+        }
+    }
+
     fn push(&mut self, new_value: T) {
         match self {
             Self::Leaf {
@@ -80,14 +87,13 @@ mod test_binary_search_tree {
 
         // check if 2 is to the left of 5
         tree.push(2);
-        });
         assert!(_eq_node_value(&tree, 5));
         assert!(match tree {
             BST::Leaf {
                 value,
-                ref mut left,
+                left,
                 right,
-            } => _eq_node_value(left, 2) && _eq_node_value(node, expected_value),
+            } => _eq_node_value(&left, 2) && right.is_nil(),
             BST::Nil => false,
         });
 
