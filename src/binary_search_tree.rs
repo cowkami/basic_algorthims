@@ -40,15 +40,9 @@ impl<T: Ord + PartialEq> BST<T> {
         }
     }
 
+    // fn find(&self, target: T) -> &T {}
     // fn pop(&mut self) -> T {
-    //     match self.left {
-    //         Some(ref mut left) => left.pop(),
-    //         None => {
-    //             let ret = self.value;
-    //             self = None;
-    //             ret
-    //         },
-    //     }
+
     // }
 
     // fn delete(&mut self, value: T) -> bool { true }
@@ -90,9 +84,9 @@ mod test_binary_search_tree {
         assert!(_eq_node_value(&tree, 5));
         assert!(match tree {
             BST::Leaf {
-                value: _,
                 ref left,
                 ref right,
+                ..
             } => _eq_node_value(left, 2) && right.is_nil(),
             _ => false,
         });
@@ -102,9 +96,9 @@ mod test_binary_search_tree {
         assert!(_eq_node_value(&tree, 5));
         assert!(match tree {
             BST::Leaf {
-                value: _,
                 ref left,
                 ref right,
+                ..
             } => _eq_node_value(left, 2) && _eq_node_value(right, 9),
             _ => false,
         });
@@ -114,23 +108,15 @@ mod test_binary_search_tree {
         assert!(_eq_node_value(&tree, 5));
         assert!(match tree {
             BST::Leaf {
-                value: _,
                 ref left,
                 ref right,
+                ..
             } => _eq_node_value(left, 2) && _eq_node_value(right, 9),
             _ => false,
         });
         assert!(match tree {
-            BST::Leaf {
-                value: _,
-                left: _,
-                right: right1,
-            } => match *right1 {
-                BST::Leaf {
-                    value: _,
-                    left: ref left2,
-                    right: _,
-                } => _eq_node_value(left2, 8),
+            BST::Leaf { right, .. } => match *right {
+                BST::Leaf { ref left, .. } => _eq_node_value(left, 8),
                 _ => false,
             },
             _ => false,
@@ -138,10 +124,15 @@ mod test_binary_search_tree {
     }
 
     // #[test]
-    // fn pop() {
-    //     let mut tree = _new_tree();
+    // fn find() {
+    // println!("");
+    // }
 
-    //     assert_eq!(tree.pop(), 2);
+    // #[test]
+    // fn pop() {
+    // let mut tree = _new_tree();
+
+    // assert_eq!(tree.pop(), 2);
     //     assert_eq!(tree.value, 5);
     //     assert!(tree.left.is_none());
     //     assert!(_eq_node_value(&tree.right, 9));
