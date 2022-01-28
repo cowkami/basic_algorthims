@@ -40,12 +40,16 @@ impl<T: Ord + PartialEq> BST<T> {
         }
     }
 
-    // fn find(&self, target: T) -> &T {}
-    // fn pop(&mut self) -> T {
-
-    // }
-
-    // fn delete(&mut self, value: T) -> bool { true }
+    fn find(&mut self, target: T) -> &Self {
+        match self {
+            Self::Leaf { value, .. } if *value == target => self,
+            Self::Leaf { value, left, right } => match *value > target {
+                true => left.find(target),
+                false => right.find(target),
+            },
+            Self::Nil => self,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -123,10 +127,16 @@ mod test_binary_search_tree {
         });
     }
 
-    // #[test]
-    // fn find() {
-    // println!("");
-    // }
+    #[test]
+    fn find() {
+        let mut tree: BST<i8> = _new_tree();
+
+        assert!(_eq_node_value(&tree.find(5), 5));
+        assert!(_eq_node_value(&tree.find(2), 2));
+        assert!(_eq_node_value(&tree.find(9), 9));
+        assert!(_eq_node_value(&tree.find(8), 8));
+        assert!(!_eq_node_value(&tree.find(4), 4));
+    }
 
     // #[test]
     // fn pop() {
