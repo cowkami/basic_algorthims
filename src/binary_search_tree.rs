@@ -8,9 +8,17 @@ enum BST<T> {
     Nil,
 }
 
-impl<T: Ord + PartialEq> BST<T> {
+impl<T: Ord + PartialEq + Copy> BST<T> {
     fn new() -> Self {
         Self::Nil
+    }
+
+    fn new_leaf(value: T) -> Self {
+        Self::Leaf {
+            value: value,
+            left: Box::new(Self::Nil),
+            right: Box::new(Self::Nil),
+        }
     }
 
     fn is_nil(&self) -> bool {
@@ -30,13 +38,7 @@ impl<T: Ord + PartialEq> BST<T> {
                 true => left.push(new_value),
                 false => right.push(new_value),
             },
-            Self::Nil => {
-                *self = Self::Leaf {
-                    value: new_value,
-                    left: Box::new(Self::Nil),
-                    right: Box::new(Self::Nil),
-                }
-            }
+            Self::Nil => *self = Self::new_leaf(new_value),
         }
     }
 
@@ -49,6 +51,21 @@ impl<T: Ord + PartialEq> BST<T> {
             },
             Self::Nil => self,
         }
+    }
+
+    fn pop(&mut self) -> Self {
+        let ret;
+        match self {
+            Self::Leaf { value, left, .. } => match **left {
+                Self::Leaf { .. } => ret = left.pop(),
+                Self::Nil => {
+                    ret = Self::new_leaf(*value);
+                    *self = Self::Nil;
+                }
+            },
+            Self::Nil => ret = Self::Nil,
+        }
+        ret
     }
 }
 
@@ -138,21 +155,16 @@ mod test_binary_search_tree {
         assert!(!_eq_node_value(&tree.find(4), 4));
     }
 
-    // #[test]
-    // fn pop() {
-    // let mut tree = _new_tree();
+    #[test]
+    fn pop() {
+        let mut tree: BST<i8> = _new_tree();
 
-    // assert_eq!(tree.pop(), 2);
-    //     assert_eq!(tree.value, 5);
-    //     assert!(tree.left.is_none());
-    //     assert!(_eq_node_value(&tree.right, 9));
-    //     assert!(
-    //         match tree.right {
-    //             Some(right) => _eq_node_value(&right.left, 8),
-    //             None => false,
-    //         }
-    //     );
-    // }
+        assert_eq!(tree.pop(), BST::new_leaf(2));
+        assert_eq!(tree.pop(), BST::new_leaf(5));
+        assert_eq!(tree.pop(), BST::new_leaf(8));
+        assert_eq!(tree.pop(), BST::new_leaf(9));
+        assert!(tree.pop().is_nil());
+    }
 
     // #[test]
     // fn delete() {
