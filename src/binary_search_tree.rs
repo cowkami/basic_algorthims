@@ -46,6 +46,23 @@ impl<T: PartialOrd> Node<T> {
             false => Self::push_or_insert(&mut self.right, new_value),
         }
     }
+
+    fn find(&self, target: T) -> Option<&Node<T>> {
+        match self {
+            Node { value, .. } if *value == target => Some(self),
+            Node { value, left, right } => match *value > target {
+                true => match left.as_deref() {
+                    Some(left_node) => left_node.find(target),
+                    None => None,
+                },
+                false => match right.as_deref() {
+                    Some(right_node) => right_node.find(target),
+                    None => None,
+                },
+            },
+            _ => None,
+        }
+    }
 }
 
 impl<T: PartialOrd> BST<T> {
@@ -57,16 +74,12 @@ impl<T: PartialOrd> BST<T> {
         Node::push_or_insert(&mut self.root, new_value)
     }
 
-    // fn find(&mut self, target: T) -> &Self {
-    //     match self {
-    //         Self::Node { value, .. } if *value == target => self,
-    //         Self::Node { value, left, right } => match *value > target {
-    //             true => left.find(target),
-    //             false => right.find(target),
-    //         },
-    //         Self::Nil => self,
-    //     }
-    // }
+    fn find(&mut self, target: T) -> Option<&Node<T>> {
+        match self.root.as_deref() {
+            Some(node) => node.find(target),
+            None => None,
+        }
+    }
 
     // fn min(self) -> Self {
     //     match self {
@@ -160,39 +173,57 @@ mod test_binary_search_tree {
                 .value,
             8
         );
-
-        // #[test]
-        // fn find() {
-        //     let mut tree: BST<i8> = _new_tree();
-
-        //     assert!(_eq_node_value(&tree.find(5), 5));
-        //     assert!(_eq_node_value(&tree.find(2), 2));
-        //     assert!(_eq_node_value(&tree.find(9), 9));
-        //     assert!(_eq_node_value(&tree.find(8), 8));
-        //     assert!(!_eq_node_value(&tree.find(4), 4));
-        // }
-
-        // #[test]
-        // fn pop() {
-        //     let mut tree: BST<i8> = _new_tree();
-
-        //     assert_eq!(tree.pop(), BST::new_leaf(2));
-        //     assert_eq!(tree.pop(), BST::new_leaf(5));
-        //     assert_eq!(tree.pop(), BST::new_leaf(8));
-        //     assert_eq!(tree.pop(), BST::new_leaf(9));
-        //     assert!(tree.pop().is_nil());
-        // }
-
-        // #[test]
-        // fn delete() {
-        // let mut tree1 = new_data();
-
-        // // check if returns false when no 6 value on any node
-        // assert!(!tree1.delete(6));
-
-        // // check if replaces nodes keeping smaller left
-        // assert!(tree1.delete(5));
-        // assert!(_eq_node_value(&tree.left, 2));
-        // assert!(tree.right.is_none());
     }
+
+    #[test]
+    fn find() {
+        let mut tree1: BST<i8> = _new_tree();
+        let tree2: BST<i8> = _new_tree();
+
+        assert_eq!(tree1.find(5), tree2.root.as_deref());
+        assert_eq!(
+            tree1.find(2),
+            tree2.root.as_deref().unwrap().left.as_deref()
+        );
+        assert_eq!(
+            tree1.find(9),
+            tree2.root.as_deref().unwrap().right.as_deref()
+        );
+        assert_eq!(
+            tree1.find(8),
+            tree2
+                .root
+                .as_deref()
+                .unwrap()
+                .right
+                .as_deref()
+                .unwrap()
+                .left
+                .as_deref()
+        );
+    }
+
+    // #[test]
+    // fn pop() {
+    //     let mut tree: BST<i8> = _new_tree();
+
+    //     assert_eq!(tree.pop(), BST::new_leaf(2));
+    //     assert_eq!(tree.pop(), BST::new_leaf(5));
+    //     assert_eq!(tree.pop(), BST::new_leaf(8));
+    //     assert_eq!(tree.pop(), BST::new_leaf(9));
+    //     assert!(tree.pop().is_nil());
+    // }
+
+    // #[test]
+    // fn delete() {
+    // let mut tree1 = new_data();
+
+    // // check if returns false when no 6 value on any node
+    // assert!(!tree1.delete(6));
+
+    // // check if replaces nodes keeping smaller left
+    // assert!(tree1.delete(5));
+    // assert!(_eq_node_value(&tree.left, 2));
+    // assert!(tree.right.is_none());
+    // }
 }
