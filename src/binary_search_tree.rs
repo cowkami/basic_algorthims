@@ -39,9 +39,10 @@ impl<T: PartialOrd> Node<T> {
     }
 
     fn push(&mut self, new_value: T) {
-        match self.value > new_value {
-            true => Self::push_or_insert(&mut self.left, new_value),
-            false => Self::push_or_insert(&mut self.right, new_value),
+        if self.value > new_value {
+            Self::push_or_insert(&mut self.left, new_value)
+        } else {
+            Self::push_or_insert(&mut self.right, new_value)
         }
     }
 
@@ -53,13 +54,12 @@ impl<T: PartialOrd> Node<T> {
     }
 
     fn find(&self, target: T) -> Option<&Node<T>> {
-        match self {
-            Node { value, .. } if *value == target => Some(self),
-            Node { value, left, right } => match *value > target {
-                true => Self::find_or_none(left, target),
-                false => Self::find_or_none(right, target),
-            },
-            _ => None,
+        if self.value == target {
+            Some(self)
+        } else if self.value > target {
+            Self::find_or_none(&self.left, target)
+        } else {
+            Self::find_or_none(&self.right, target)
         }
     }
 }
@@ -73,8 +73,8 @@ impl<T: PartialOrd> BST<T> {
         Node::push_or_insert(&mut self.root, new_value)
     }
 
-    fn find(&mut self, target: T) -> Option<&Node<T>> {
-        Node::find_or_none(&mut self.root, target)
+    fn find(&self, target: T) -> Option<&Node<T>> {
+        Node::find_or_none(&self.root, target)
     }
 
     // fn min(self) -> Self {
@@ -173,9 +173,10 @@ mod test_binary_search_tree {
 
     #[test]
     fn find() {
-        let mut tree1: BST<i8> = _new_tree();
+        let tree1: BST<i8> = _new_tree();
         let tree2: BST<i8> = _new_tree();
 
+        assert_eq!(BST::<i8>::new().root, None);
         assert_eq!(tree1.find(5), tree2.root.as_deref());
         assert_eq!(
             tree1.find(2),
