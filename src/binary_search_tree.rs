@@ -31,12 +31,10 @@ impl<T: PartialOrd> Node<T> {
         Some(Box::new(Node::new(value)))
     }
 
-    fn push_or_insert(opt_node: &mut Link<T>, new_value: T) {
-        match opt_node {
-            Some(node) => {
-                node.push(new_value);
-            }
-            None => *opt_node = Self::new_link(new_value),
+    fn push_or_insert(link: &mut Link<T>, new_value: T) {
+        match link {
+            Some(node) => node.push(new_value),
+            None => *link = Self::new_link(new_value),
         }
     }
 
@@ -47,18 +45,19 @@ impl<T: PartialOrd> Node<T> {
         }
     }
 
+    fn find_or_none(link: &Link<T>, target: T) -> Option<&Node<T>> {
+        match link {
+            Some(node) => node.find(target),
+            None => None,
+        }
+    }
+
     fn find(&self, target: T) -> Option<&Node<T>> {
         match self {
             Node { value, .. } if *value == target => Some(self),
             Node { value, left, right } => match *value > target {
-                true => match left.as_deref() {
-                    Some(left_node) => left_node.find(target),
-                    None => None,
-                },
-                false => match right.as_deref() {
-                    Some(right_node) => right_node.find(target),
-                    None => None,
-                },
+                true => Self::find_or_none(left, target),
+                false => Self::find_or_none(right, target),
             },
             _ => None,
         }
@@ -75,10 +74,7 @@ impl<T: PartialOrd> BST<T> {
     }
 
     fn find(&mut self, target: T) -> Option<&Node<T>> {
-        match self.root.as_deref() {
-            Some(node) => node.find(target),
-            None => None,
-        }
+        Node::find_or_none(&mut self.root, target)
     }
 
     // fn min(self) -> Self {
