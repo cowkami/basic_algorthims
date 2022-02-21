@@ -7,6 +7,7 @@ struct Node<T> {
     right: Link<T>,
 }
 
+#[derive(Debug)]
 struct BST<T> {
     root: Link<T>,
 }
@@ -16,7 +17,16 @@ impl<T: PartialEq> PartialEq for Node<T> {
         self.value == other.value && self.left == other.left && self.right == other.right
     }
 }
+
 impl<T: PartialEq> Eq for Node<T> {}
+
+impl<T: PartialEq> PartialEq for BST<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.root == other.root
+    }
+}
+
+impl<T: PartialEq> Eq for BST<T> {}
 
 impl<T: PartialOrd> Node<T> {
     fn new(value: T) -> Self {
@@ -46,25 +56,48 @@ impl<T: PartialOrd> Node<T> {
         }
     }
 
-    fn find_or_none(link: &Link<T>, target: T) -> Option<&Node<T>> {
+    fn find_or_none(link: &mut Link<T>, target: T) -> Option<&mut Node<T>> {
         match link {
             Some(node) => node.find(target),
             None => None,
         }
     }
 
-    fn find(&self, target: T) -> Option<&Node<T>> {
+    fn find(&mut self, target: T) -> Option<&mut Node<T>> {
         if self.value == target {
             Some(self)
         } else if self.value > target {
-            Self::find_or_none(&self.left, target)
+            Self::find_or_none(&mut self.left, target)
         } else {
-            Self::find_or_none(&self.right, target)
+            Self::find_or_none(&mut self.right, target)
+        }
+    }
+
+    fn min_node_or_none(link: &mut Link<T>) -> Option<&Node<T>> {
+        match link {
+            Some(node) => node.min_node(),
+            None => None,
+        }
+    }
+
+    fn min_node(&mut self) -> Option<&Node<T>> {
+        match self.left {
+            Some(ref mut node) => node.min_node(),
+            None => Some(self),
+        }
+    }
+
+    fn pop_min_or_none(link: &mut Link<T>) -> Option<&Node<T>> {}
+
+    fn pop_min(&mut self) -> Option<T> {
+        match self.left {
+            Some(ref mut node) => node.min_node(),
+            None => Some(self),
         }
     }
 }
 
-impl<T: PartialOrd> BST<T> {
+impl<T: PartialOrd + Copy> BST<T> {
     fn new() -> Self {
         Self { root: None }
     }
@@ -73,16 +106,17 @@ impl<T: PartialOrd> BST<T> {
         Node::push_or_insert(&mut self.root, new_value)
     }
 
-    fn find(&self, target: T) -> Option<&Node<T>> {
-        Node::find_or_none(&self.root, target)
+    fn find(&mut self, target: T) -> Option<&mut Node<T>> {
+        Node::find_or_none(&mut self.root, target)
     }
 
-    // fn min(self) -> Self {
-    //     match self {
-    //         Self::Node { .. } => self.0.min(),
-    //         Self::Nil => Self::Nil,
-    //     }
-    // }
+    fn min_node(&mut self) -> Option<&Node<T>> {
+        Node::min_node_or_none(&mut self.root)
+    }
+
+    fn pop_min(&mut self) -> Option<T> {
+        Node::pop_min_or_none(&mut self.root)
+    }
 }
 
 #[cfg(test)]
@@ -173,54 +207,103 @@ mod test {
 
     #[test]
     fn find() {
-        let tree1: BST<i8> = _new_tree();
-        let tree2: BST<i8> = _new_tree();
+        let mut tree1: BST<i8> = _new_tree();
+        let mut tree2: BST<i8> = _new_tree();
 
+        // check if root is none
+        //    N
+        //   / \
         assert_eq!(BST::<i8>::new().root, None);
-        assert_eq!(tree1.find(5), tree2.root.as_deref());
+
+        // check if get ref. of root.
+        //   [5]
+        //   / \
+        //  2   9
+        //     /
+        //    8
+        assert_eq!(tree1.find(5), tree2.root.as_deref_mut());
+
+        // check if get ref. of the left node.
+        //    5
+        //   / \
+        // [2]  9
+        //     /
+        //    8
         assert_eq!(
             tree1.find(2),
-            tree2.root.as_deref().unwrap().left.as_deref()
+            tree2.root.as_deref_mut().unwrap().left.as_deref_mut()
         );
+
+        // check if get ref. of the right node.
+        //    5
+        //   / \
+        //  2  [9]
+        //     /
+        //    8
         assert_eq!(
             tree1.find(9),
-            tree2.root.as_deref().unwrap().right.as_deref()
+            tree2.root.as_deref_mut().unwrap().right.as_deref_mut()
         );
+
+        // check if get ref. of the deeper node.
+        //    5
+        //   / \
+        //  2   9
+        //     /
+        //   [8]
         assert_eq!(
             tree1.find(8),
             tree2
                 .root
-                .as_deref()
+                .as_deref_mut()
                 .unwrap()
                 .right
-                .as_deref()
+                .as_deref_mut()
                 .unwrap()
                 .left
-                .as_deref()
+                .as_deref_mut()
         );
     }
 
-    // #[test]
-    // fn pop() {
-    //     let mut tree: BST<i8> = _new_tree();
+    #[test]
+    fn min_node() {
+        let mut tree: BST<i8> = _new_tree();
 
-    //     assert_eq!(tree.pop(), BST::new_leaf(2));
-    //     assert_eq!(tree.pop(), BST::new_leaf(5));
-    //     assert_eq!(tree.pop(), BST::new_leaf(8));
-    //     assert_eq!(tree.pop(), BST::new_leaf(9));
-    //     assert!(tree.pop().is_nil());
-    // }
+        // check if root is none
+        //    N
+        //   / \
+        assert_eq!(BST::<i8>::new().min_node(), None);
 
-    // #[test]
-    // fn delete() {
-    // let mut tree1 = new_data();
+        // check when Node has a value and no left and no right.
+        //   [2]
+        //   / \
+        //  N   N
+        assert_eq!(
+            tree.root
+                .as_deref_mut()
+                .unwrap()
+                .left
+                .as_deref_mut()
+                .unwrap()
+                .min_node(),
+            Some(&Node::<i8>::new(2))
+        );
 
-    // // check if returns false when no 6 value on any node
-    // assert!(!tree1.delete(6));
+        // check when Node has a value and no left and no right.
+        //    5
+        //   / \
+        // [2]  9
+        assert_eq!(tree.min_node(), Some(&Node::<i8>::new(2)));
+    }
 
-    // // check if replaces nodes keeping smaller left
-    // assert!(tree1.delete(5));
-    // assert!(_eq_node_value(&tree.left, 2));
-    // assert!(tree.right.is_none());
-    // }
+    #[test]
+    fn pop_min() {
+        let mut tree: BST<i8> = _new_tree();
+
+        assert_eq!(tree.pop_min(), Some(2));
+        assert_eq!(tree.pop_min(), Some(5));
+        // assert_eq!(tree.pop_min(), Some(8));
+        // assert_eq!(tree.pop_min(), Some(9));
+        // assert_eq!(tree.pop_min(), None);
+    }
 }
