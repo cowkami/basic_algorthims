@@ -62,6 +62,20 @@ impl<T: PartialOrd> Node<T> {
             Self::find_or_none(&self.right, target)
         }
     }
+
+    fn min_node_or_none(link: &Link<T>) -> Option<&Node<T>> {
+        match link {
+            Some(node) => node.min_node(),
+            None => None,
+        }
+    }
+
+    fn min_node(&self) -> Option<&Node<T>> {
+        match self.left {
+            Some(ref node) => node.min_node(),
+            None => Some(self),
+        }
+    }
 }
 
 impl<T: PartialOrd> BST<T> {
@@ -77,12 +91,9 @@ impl<T: PartialOrd> BST<T> {
         Node::find_or_none(&self.root, target)
     }
 
-    // fn min(self) -> Self {
-    //     match self {
-    //         Self::Node { .. } => self.0.min(),
-    //         Self::Nil => Self::Nil,
-    //     }
-    // }
+    fn min_node(&self) -> Option<&Node<T>> {
+        Node::min_node_or_none(&self.root)
+    }
 }
 
 #[cfg(test)]
@@ -176,16 +187,47 @@ mod test_binary_search_tree {
         let tree1: BST<i8> = _new_tree();
         let tree2: BST<i8> = _new_tree();
 
+        // check if root is none
+        //    N
+        //   / \
         assert_eq!(BST::<i8>::new().root, None);
+
+        // check if get ref. of root.
+        //   [5]
+        //   / \
+        //  2   9
+        //     /
+        //    8
         assert_eq!(tree1.find(5), tree2.root.as_deref());
+
+        // check if get ref. of the left node.
+        //    5
+        //   / \
+        // [2]  9
+        //     /
+        //    8
         assert_eq!(
             tree1.find(2),
             tree2.root.as_deref().unwrap().left.as_deref()
         );
+
+        // check if get ref. of the right node.
+        //    5
+        //   / \
+        //  2  [9]
+        //     /
+        //    8
         assert_eq!(
             tree1.find(9),
             tree2.root.as_deref().unwrap().right.as_deref()
         );
+
+        // check if get ref. of the deeper node.
+        //    5
+        //   / \
+        //  2   9
+        //     /
+        //   [8]
         assert_eq!(
             tree1.find(8),
             tree2
@@ -200,7 +242,37 @@ mod test_binary_search_tree {
         );
     }
 
-    // #[test]
+    #[test]
+    fn min_node() {
+        let tree: BST<i8> = _new_tree();
+
+        // check if root is none
+        //    N
+        //   / \
+        assert_eq!(BST::<i8>::new().min_node(), None);
+
+        // check when Node has a value and no left and no right.
+        //   [2]
+        //   / \
+        //  N   N
+        assert_eq!(
+            tree.root
+                .as_deref()
+                .unwrap()
+                .left
+                .as_deref()
+                .unwrap()
+                .min_node(),
+            Some(&Node::<i8>::new(2))
+        );
+
+        // check when Node has a value and no left and no right.
+        //    5
+        //   / \
+        // [2]  9
+        assert_eq!(tree.min_node(), Some(&Node::<i8>::new(2)));
+    }
+
     // fn pop() {
     //     let mut tree: BST<i8> = _new_tree();
 
