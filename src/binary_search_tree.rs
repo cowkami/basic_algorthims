@@ -1,6 +1,6 @@
 type Link<T> = Option<Box<Node<T>>>;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 struct Node<T> {
     value: T,
     left: Link<T>,
@@ -93,6 +93,10 @@ impl<T: PartialOrd> BST<T> {
 
     fn min_node(&self) -> Option<&Node<T>> {
         Node::min_node_or_none(&self.root)
+    }
+
+    fn pop_min(&mut self) -> Option<T> {
+        Self::min_node(&mut self).map(|x| x.value)
     }
 }
 
@@ -273,15 +277,15 @@ mod test_binary_search_tree {
         assert_eq!(tree.min_node(), Some(&Node::<i8>::new(2)));
     }
 
-    // fn pop() {
-    //     let mut tree: BST<i8> = _new_tree();
+    fn pop() {
+        let mut tree: BST<i8> = _new_tree();
 
-    //     assert_eq!(tree.pop(), BST::new_leaf(2));
-    //     assert_eq!(tree.pop(), BST::new_leaf(5));
-    //     assert_eq!(tree.pop(), BST::new_leaf(8));
-    //     assert_eq!(tree.pop(), BST::new_leaf(9));
-    //     assert!(tree.pop().is_nil());
-    // }
+        assert_eq!(tree.pop(), BST::new(2));
+        assert_eq!(tree.pop(), BST::new_leaf(5));
+        assert_eq!(tree.pop(), BST::new_leaf(8));
+        assert_eq!(tree.pop(), BST::new_leaf(9));
+        assert!(tree.pop().is_nil());
+    }
 
     // #[test]
     // fn delete() {
