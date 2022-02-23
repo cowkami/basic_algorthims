@@ -1,6 +1,6 @@
 type Link<T> = Option<Box<Node<T>>>;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug)]
 struct Node<T> {
     value: T,
     left: Link<T>,
@@ -46,39 +46,39 @@ impl<T: PartialOrd> Node<T> {
         }
     }
 
-    fn find_or_none(link: &Link<T>, target: T) -> Option<&Node<T>> {
+    fn find_or_none(link: &mut Link<T>, target: T) -> Option<&Node<T>> {
         match link {
             Some(node) => node.find(target),
             None => None,
         }
     }
 
-    fn find(&self, target: T) -> Option<&Node<T>> {
+    fn find(&mut self, target: T) -> Option<&Node<T>> {
         if self.value == target {
             Some(self)
         } else if self.value > target {
-            Self::find_or_none(&self.left, target)
+            Self::find_or_none(&mut self.left, target)
         } else {
-            Self::find_or_none(&self.right, target)
+            Self::find_or_none(&mut self.right, target)
         }
     }
 
-    fn min_node_or_none(link: &Link<T>) -> Option<&Node<T>> {
+    fn min_node_or_none(link: &mut Link<T>) -> Option<&Node<T>> {
         match link {
             Some(node) => node.min_node(),
             None => None,
         }
     }
 
-    fn min_node(&self) -> Option<&Node<T>> {
+    fn min_node(&mut self) -> Option<&Node<T>> {
         match self.left {
-            Some(ref node) => node.min_node(),
+            Some(ref mut node) => node.min_node(),
             None => Some(self),
         }
     }
 }
 
-impl<T: PartialOrd> BST<T> {
+impl<T: PartialOrd + Copy> BST<T> {
     fn new() -> Self {
         Self { root: None }
     }
@@ -87,16 +87,18 @@ impl<T: PartialOrd> BST<T> {
         Node::push_or_insert(&mut self.root, new_value)
     }
 
-    fn find(&self, target: T) -> Option<&Node<T>> {
-        Node::find_or_none(&self.root, target)
+    fn find(&mut self, target: T) -> Option<&Node<T>> {
+        Node::find_or_none(&mut self.root, target)
     }
 
-    fn min_node(&self) -> Option<&Node<T>> {
-        Node::min_node_or_none(&self.root)
+    fn min_node(&mut self) -> Option<&Node<T>> {
+        Node::min_node_or_none(&mut self.root)
     }
 
     fn pop_min(&mut self) -> Option<T> {
-        Self::min_node(&mut self).map(|x| x.value)
+        let mut node = Self::min_node(self);
+        let ret = node.map(|x| x.value);
+        ret
     }
 }
 
@@ -188,7 +190,7 @@ mod test_binary_search_tree {
 
     #[test]
     fn find() {
-        let tree1: BST<i8> = _new_tree();
+        let mut tree1: BST<i8> = _new_tree();
         let tree2: BST<i8> = _new_tree();
 
         // check if root is none
@@ -248,7 +250,7 @@ mod test_binary_search_tree {
 
     #[test]
     fn min_node() {
-        let tree: BST<i8> = _new_tree();
+        let mut tree: BST<i8> = _new_tree();
 
         // check if root is none
         //    N
@@ -261,10 +263,10 @@ mod test_binary_search_tree {
         //  N   N
         assert_eq!(
             tree.root
-                .as_deref()
+                .as_deref_mut()
                 .unwrap()
                 .left
-                .as_deref()
+                .as_deref_mut()
                 .unwrap()
                 .min_node(),
             Some(&Node::<i8>::new(2))
@@ -277,14 +279,15 @@ mod test_binary_search_tree {
         assert_eq!(tree.min_node(), Some(&Node::<i8>::new(2)));
     }
 
-    fn pop() {
+    #[test]
+    fn pop_min() {
         let mut tree: BST<i8> = _new_tree();
 
-        assert_eq!(tree.pop(), BST::new(2));
-        assert_eq!(tree.pop(), BST::new_leaf(5));
-        assert_eq!(tree.pop(), BST::new_leaf(8));
-        assert_eq!(tree.pop(), BST::new_leaf(9));
-        assert!(tree.pop().is_nil());
+        assert_eq!(tree.pop_min(), Some(2));
+        assert_eq!(tree.pop_min(), Some(5));
+        assert_eq!(tree.pop_min(), Some(8));
+        assert_eq!(tree.pop_min(), Some(9));
+        assert_eq!(tree.pop_min(), None);
     }
 
     // #[test]
