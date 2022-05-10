@@ -1,11 +1,14 @@
 struct Heap<T> {
     data: Vec<T>,
-    len: usize
+    len: usize,
 }
 
 impl<T: PartialOrd + Copy> Heap<T> {
     fn new() -> Self {
-        Self { data: Vec::<T>::new(), len: 0 }
+        Self {
+            data: Vec::<T>::new(),
+            len: 0,
+        }
     }
     fn push(&mut self, value: T) {
         self.data.push(value);
@@ -35,15 +38,16 @@ impl<T: PartialOrd + Copy> Heap<T> {
             } else if self.data[i] > self.data[r] {
                 self.data.swap(i, r);
                 i = r;
-            } else { break }
+            } else {
+                break;
+            }
         }
         ret
     }
 }
 
-
 #[cfg(test)]
-mod test_priority_queue {
+mod test {
     use super::*;
 
     #[test]
