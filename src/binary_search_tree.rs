@@ -86,7 +86,7 @@ impl<T: PartialOrd> BST<T> {
 }
 
 #[cfg(test)]
-mod test_binary_search_tree {
+mod test {
     use super::*;
 
     fn _new_tree() -> BST<i8> {
