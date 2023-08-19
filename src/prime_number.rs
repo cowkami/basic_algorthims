@@ -1,6 +1,3 @@
-use std::ops::{Deref, DerefMut};
-
-// type T = u64;
 struct Prime {
     curr: u64,
     nums: Vec<u64>,
