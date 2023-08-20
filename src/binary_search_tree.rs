@@ -28,7 +28,7 @@ impl<T: PartialEq> PartialEq for BST<T> {
 
 impl<T: PartialEq> Eq for BST<T> {}
 
-impl<T: PartialOrd> Node<T> {
+impl<T: PartialOrd + Copy> Node<T> {
     fn new(value: T) -> Self {
         Self {
             value: value,
@@ -87,12 +87,22 @@ impl<T: PartialOrd> Node<T> {
         }
     }
 
-    fn pop_min_or_none(link: &mut Link<T>) -> Option<&Node<T>> {}
-
-    fn pop_min(&mut self) -> Option<T> {
-        match self.left {
-            Some(ref mut node) => node.min_node(),
-            None => Some(self),
+    fn pop_min(link: &mut Link<T>) -> Option<T> {
+        match link.take() {
+            Some(mut node) => {
+                if node.left.is_some() {
+                    Self::pop_min(&mut node.left)
+                } else if node.right.is_some() {
+                    let value = node.value;
+                    *link = node.right;
+                    Some(value)
+                } else {
+                    let value = node.value;
+                    *link = None;
+                    Some(value)
+                }
+            }
+            None => None,
         }
     }
 }
@@ -115,7 +125,7 @@ impl<T: PartialOrd + Copy> BST<T> {
     }
 
     fn pop_min(&mut self) -> Option<T> {
-        Node::pop_min_or_none(&mut self.root)
+        Node::pop_min(&mut self.root)
     }
 }
 
@@ -302,8 +312,8 @@ mod test {
 
         assert_eq!(tree.pop_min(), Some(2));
         assert_eq!(tree.pop_min(), Some(5));
-        // assert_eq!(tree.pop_min(), Some(8));
-        // assert_eq!(tree.pop_min(), Some(9));
-        // assert_eq!(tree.pop_min(), None);
+        assert_eq!(tree.pop_min(), Some(8));
+        assert_eq!(tree.pop_min(), Some(9));
+        assert_eq!(tree.pop_min(), None);
     }
 }
