@@ -88,19 +88,12 @@ impl<T: PartialOrd + Copy> Node<T> {
     }
 
     fn pop_min(link: &mut Link<T>) -> Option<T> {
-        match link.take() {
-            Some(mut node) => {
-                if node.left.is_some() {
-                    Self::pop_min(&mut node.left)
-                } else if node.right.is_some() {
-                    let value = node.value;
-                    *link = node.right;
-                    Some(value)
-                } else {
-                    let value = node.value;
-                    *link = None;
-                    Some(value)
-                }
+        match link.as_mut() {
+            Some(node) if node.left.is_some() => Self::pop_min(&mut node.left),
+            Some(node) => {
+                let value = node.value;
+                *link = node.right.take();
+                Some(value)
             }
             None => None,
         }
