@@ -11,12 +11,18 @@ impl<T: PartialOrd + PartialEq + Eq> RedBlackTree<T> {
         Self { root: None }
     }
 
-    fn push(&mut self, new_value: T) {}
+    fn push(&mut self, new_key: T) {
+        if let Some(node) = self.root.take() {
+            node.borrow_mut().push(new_key);
+        } else {
+            self.root = Node::new_link(new_key, Color::Black, None, None, None)
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
 struct Node<T> {
-    value: T,
+    key: T,
     color: Color,
     parent: Link<T>,
     left: Link<T>,
@@ -24,15 +30,17 @@ struct Node<T> {
 }
 
 impl<T: PartialOrd + PartialEq + Eq> Node<T> {
-    fn new_link(value: T, color: Color, parent: Link<T>, left: Link<T>, right: Link<T>) -> Link<T> {
+    fn new_link(key: T, color: Color, parent: Link<T>, left: Link<T>, right: Link<T>) -> Link<T> {
         Some(Rc::new(RefCell::new(Node {
-            value: value,
+            key: key,
             color: color,
             parent: parent,
             left: left,
             right: right,
         })))
     }
+
+    fn push(&mut self, new_key: T) {}
 }
 
 type Link<T> = Option<Rc<RefCell<Node<T>>>>;
