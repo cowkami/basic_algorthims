@@ -15,11 +15,11 @@ impl<T: PartialOrd + PartialEq + Eq + Copy> RedBlackTree<T> {
         Node::inorder_traverse(&self.root)
     }
 
-    fn push(&mut self, new_key: T) {
+    fn push(&mut self, key: T) {
         if let Some(node) = self.root.take() {
-            node.borrow_mut().push(new_key);
+            node.borrow_mut().push(key);
         } else {
-            self.root = Node::new_link(new_key, Color::Black, None, None, None)
+            self.root = Node::new_link(key, Color::Black, None, None, None)
         }
     }
 }
@@ -44,7 +44,7 @@ impl<T: PartialOrd + PartialEq + Eq + Copy> Node<T> {
         })))
     }
 
-    fn push(&mut self, new_key: T) {}
+    fn push(&mut self, key: T) {}
 
     fn inorder_traverse(link: &Link<T>) -> Vec<T> {
         match link.as_ref() {
