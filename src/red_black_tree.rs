@@ -11,8 +11,8 @@ impl<T: PartialOrd + PartialEq + Eq + Copy> RedBlackTree<T> {
         Self { root: None }
     }
 
-    fn in_order_traverse(&self) -> Vec<T> {
-        Node::in_order_traverse(&self.root)
+    fn inorder_traverse(&self) -> Vec<T> {
+        Node::inorder_traverse(&self.root)
     }
 
     fn push(&mut self, new_key: T) {
@@ -46,12 +46,12 @@ impl<T: PartialOrd + PartialEq + Eq + Copy> Node<T> {
 
     fn push(&mut self, new_key: T) {}
 
-    fn in_order_traverse(link: &Link<T>) -> Vec<T> {
+    fn inorder_traverse(link: &Link<T>) -> Vec<T> {
         match link.as_ref() {
             Some(node) => [
-                Node::in_order_traverse(&node.borrow().left),
+                Node::inorder_traverse(&node.borrow().left),
                 vec![node.borrow().key],
-                Node::in_order_traverse(&node.borrow().right),
+                Node::inorder_traverse(&node.borrow().right),
             ]
             .concat(),
             None => vec![],
@@ -88,7 +88,12 @@ mod test {
     }
 
     #[test]
-    fn in_order_traverse() {
+    fn inorder_traverse() {
+        //     1
+        //    / \
+        //   2   5
+        //  / \
+        // 3   4
         let tree = RedBlackTree {
             root: Node::<i8>::new_link(
                 1,
@@ -104,6 +109,7 @@ mod test {
                 Node::<i8>::new_link(5, Color::Black, None, None, None),
             ),
         };
-        assert_eq!(vec![3, 2, 4, 1, 5], tree.in_order_traverse());
+        let expected = tree.inorder_traverse();
+        assert_eq!(vec![3, 2, 4, 1, 5], expected);
     }
 }
