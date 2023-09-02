@@ -11,16 +11,16 @@ impl<T: PartialOrd + PartialEq + Eq + Copy> RedBlackTree<T> {
         Self { root: None }
     }
 
+    fn in_order_traverse(&self) -> Vec<T> {
+        Node::in_order_traverse(&self.root)
+    }
+
     fn push(&mut self, new_key: T) {
         if let Some(node) = self.root.take() {
             node.borrow_mut().push(new_key);
         } else {
             self.root = Node::new_link(new_key, Color::Black, None, None, None)
         }
-    }
-
-    fn in_order_traverse(&self) -> Vec<T> {
-        Node::in_order_traverse(Rc::clone(self.root))
     }
 }
 
@@ -49,9 +49,9 @@ impl<T: PartialOrd + PartialEq + Eq + Copy> Node<T> {
     fn in_order_traverse(link: &Link<T>) -> Vec<T> {
         match link.as_ref() {
             Some(node) => [
-                Node::in_order_traverse(&node.left),
-                vec![node.borrow_mut().key],
-                Node::in_order_traverse(&node.borrow_mut().right),
+                Node::in_order_traverse(&node.borrow().left),
+                vec![node.borrow().key],
+                Node::in_order_traverse(&node.borrow().right),
             ]
             .concat(),
             None => vec![],
@@ -72,7 +72,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn push_for_bst() {
+    fn push_for_rbt() {
         let mut tree = RedBlackTree::<i8>::new();
 
         // check initialization
@@ -85,5 +85,25 @@ mod test {
             },
             tree
         )
+    }
+
+    #[test]
+    fn in_order_traverse() {
+        let tree = RedBlackTree {
+            root: Node::<i8>::new_link(
+                1,
+                Color::Black,
+                None,
+                Node::<i8>::new_link(
+                    2,
+                    Color::Black,
+                    None,
+                    Node::<i8>::new_link(3, Color::Black, None, None, None),
+                    Node::<i8>::new_link(4, Color::Black, None, None, None),
+                ),
+                Node::<i8>::new_link(5, Color::Black, None, None, None),
+            ),
+        };
+        assert_eq!(vec![3, 2, 4, 1, 5], tree.in_order_traverse());
     }
 }
